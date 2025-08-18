@@ -115,7 +115,6 @@ class MainActivity : ComponentActivity() {
                 var post = productList[index]
                 Card(
                     onClick = {
-
                     },
                     modifier = Modifier
                         .fillMaxWidth()
