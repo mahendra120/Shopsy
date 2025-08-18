@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">Shopsy</string>
+    <string name="title_activity_about_page">aboutPage</string>
+    <string name="title_activity_category">Category</string>
+    <string name="title_activity_product_viwe_page">ProductViwePage</string>
+</resources>
