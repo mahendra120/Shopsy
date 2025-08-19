@@ -80,6 +80,7 @@ class ProductListPage : ComponentActivity() {
                     onClick = {
                         val intent = Intent(this@ProductListPage, ProductViwePage::class.java)
                         intent.putExtra("product", product)
+                        intent.putExtra("name", product.title)
                         startActivity(intent)
                     },
                     modifier = Modifier
