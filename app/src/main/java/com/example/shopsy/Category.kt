@@ -45,6 +45,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.android.volley.Request
@@ -129,8 +131,10 @@ class Category : ComponentActivity() {
                                     Text(
                                         product.category,
                                         fontFamily = font4,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
                                         fontSize = 19.sp,
-                                        fontWeight = FontWeight.Bold
+                                        fontWeight = FontWeight.Bold, textAlign = TextAlign.Center
                                     )
                                     Text(
                                         "${product.discountPercentage}% Discount",
@@ -168,7 +172,7 @@ class Category : ComponentActivity() {
     fun fetchData() {
         val url = "https://dummyjson.com/products?limit=194"
         val stringRequest =
-            StringRequest(Request.Method.GET, url, Response.Listener<String> { response ->
+            StringRequest(Request.Method.GET, url, { response ->
                 var apiResponse = response
                 val productMode = Gson().fromJson(response.toString(), Product::class.java)
                 productList.clear()
@@ -187,7 +191,7 @@ class Category : ComponentActivity() {
                 mainProductList = productMode.products
                 productList.addAll(mainProductList.distinctBy { it.category })
 
-            }, Response.ErrorListener {
+            }, {
                 Log.d("=====", "fetchData: That didn't work!")
             })
 

@@ -62,4 +62,9 @@ dependencies {
     implementation("com.google.code.gson:gson:2.11.0")
 
     implementation("com.github.bumptech.glide:compose:1.0.0-beta01")
+
+    implementation ("androidx.media3:media3-ui:1.7.1")
+    implementation("io.coil-kt:coil-compose:2.4.0")
+    implementation ("androidx.compose.material:material-icons-extended:<version>")
+    implementation ("com.razorpay:checkout:1.6.40")
 }
