@@ -3,6 +3,7 @@ package com.example.shopsy
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -31,12 +32,17 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -49,11 +55,13 @@ import com.bumptech.glide.integration.compose.GlideImage
 import com.example.shopsy.Data.Products
 import com.example.shopsy.ui.theme.ShopsyTheme
 import com.example.shopsy.ui.theme.font4
+import java.nio.file.WatchEvent
 
 class ProductListPage : ComponentActivity() {
     var productList: ArrayList<Products> = arrayListOf()
     var name = ""
 
+    @OptIn(ExperimentalMaterial3Api::class)
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,13 +69,14 @@ class ProductListPage : ComponentActivity() {
         productList = intent.getSerializableExtra(
             "productList", ArrayList::class.java
         ) as? ArrayList<Products> ?: arrayListOf()
-
-        name = intent.getStringExtra("name") ?: ""
+        name = intent.getStringExtra("name") ?: "unknown"
         setContent {
+            val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
             ShopsyTheme {
                 Scaffold(
-                    modifier = Modifier.fillMaxSize(), topBar = {
-                        TopAppbar()
+                    modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+                    topBar = {
+                        TopAppbar(scrollBehavior)
                     }) { innerPadding ->
                     Box(
                         modifier = Modifier
@@ -80,7 +89,6 @@ class ProductListPage : ComponentActivity() {
             }
         }
     }
-
     @OptIn(ExperimentalGlideComposeApi::class)
     @Composable
     fun ProductListUI() {
@@ -112,8 +120,8 @@ class ProductListPage : ComponentActivity() {
                     ) {
                         GlideImage(
                             model = product.thumbnail,
-                            contentDescription = product.title,
-                            modifier = Modifier.size(90.dp)
+                            contentDescription = null,
+                            modifier = Modifier.size(100.dp)
                         )
                         Spacer(modifier = Modifier.width(16.dp))
                         Column(
@@ -133,7 +141,7 @@ class ProductListPage : ComponentActivity() {
                             if (product.brand.isNotEmpty()) {
                                 Text(
                                     buildAnnotatedString {
-                                        withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.onBackground,)) {
+                                        withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.onBackground)) {
                                             append("Brand: ")
                                         }
                                         append("${product.brand}")
@@ -141,7 +149,7 @@ class ProductListPage : ComponentActivity() {
                                     fontFamily = font4,
                                     fontSize = 15.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = Color(253,253,0)
+                                    color = Color(253, 253, 0)
                                 )
                             }
                             Text(
@@ -170,7 +178,8 @@ class ProductListPage : ComponentActivity() {
                             )
                             Text(
                                 "⭐ ${product.rating ?: 0.0}",
-                                color = MaterialTheme.colorScheme.onBackground, fontSize = 15.sp,
+                                color = MaterialTheme.colorScheme.onBackground,
+                                fontSize = 15.sp,
                                 fontWeight = FontWeight.Bold,
                             )
                         }
@@ -179,10 +188,9 @@ class ProductListPage : ComponentActivity() {
             }
         }
     }
-
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun TopAppbar() {
+    fun TopAppbar(scrollBehavior: TopAppBarScrollBehavior) {
         TopAppBar(
             title = {
                 Text(
@@ -204,6 +212,7 @@ class ProductListPage : ComponentActivity() {
                 }
             },
             actions = {},
+            scrollBehavior = scrollBehavior
         )
     }
 }

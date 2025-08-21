@@ -11,15 +11,20 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
@@ -63,12 +68,16 @@ import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.example.shopsy.Data.Product
 import com.example.shopsy.Data.Products
+import com.example.shopsy.totalscreen.CardScreen
+import com.example.shopsy.totalscreen.ParsonScreen
 import com.example.shopsy.ui.theme.ShopsyTheme
 import com.example.shopsy.ui.theme.font4
 import com.google.gson.Gson
+
 class Category : ComponentActivity() {
     val productList = mutableStateListOf<Products>()
     var mainProductList = ArrayList<Products>(0)
+    var selecetedIcon by mutableStateOf(0)
 
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -76,18 +85,23 @@ class Category : ComponentActivity() {
         enableEdgeToEdge()
         fetchData()
         setContent {
-            ShopsyTheme {   // 👈 wrap everything in theme
+            ShopsyTheme {
                 Scaffold(
+                    modifier = Modifier.fillMaxWidth(),
                     topBar = { topbar() },
                     bottomBar = { bottomber() }
                 ) { innerPadding ->
-                    mySearchBar()
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(innerPadding)
                     ) {
-                        categoryScreen(modifier = Modifier)
+//                        categoryScreen(modifier = Modifier)
+                        when (selecetedIcon) {
+                            0 -> categoryScreen(modifier = Modifier)
+                            1 -> CardScreen(modifier = Modifier)
+                            2 -> ParsonScreen(modifier = Modifier)
+                        }
                     }
                 }
             }
@@ -98,57 +112,63 @@ class Category : ComponentActivity() {
     @Composable
     fun categoryScreen(modifier: Modifier) {
         if (productList.isNotEmpty()) {
-            LazyVerticalGrid(columns = GridCells.Fixed(2)) {
-                items(productList.size) { index ->
-                    val product = productList[index]
-                    Card(
-                        onClick = {
-                            val list =
-                                ArrayList(mainProductList.filter { it.category == product.category })
-                            val intent = Intent(this@Category, ProductListPage::class.java)
-                            intent.putExtra("productList", list)
-                            intent.putExtra("name", product.category)
-                            startActivity(intent)
-                        },
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(12.dp))
-                            .padding(horizontal = 10.dp, vertical = 5.dp)
-                            .border(
-                                1.dp,
-                                MaterialTheme.colorScheme.onBackground, // 👈 respect theme
-                                RoundedCornerShape(12.dp)
-                            ),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surface
-                        )
-                    ) {
-                        Column(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalAlignment = Alignment.CenterHorizontally
+            Column {
+                mySearchBar()
+                LazyVerticalGrid(columns = GridCells.Fixed(2)) {
+                    items(productList.size) { index ->
+                        val product = productList[index]
+                        Card(
+                            onClick = {
+                                val list =
+                                    ArrayList(mainProductList.filter { it.category == product.category })
+                                val intent = Intent(this@Category, ProductListPage::class.java)
+                                intent.putExtra("productList", list)
+                                intent.putExtra("name", product.category)
+                                startActivity(intent)
+                            },
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(12.dp))
+                                .padding(horizontal = 10.dp, vertical = 5.dp)
+                                .border(
+                                    1.dp,
+                                    MaterialTheme.colorScheme.onBackground,
+                                    RoundedCornerShape(12.dp)
+                                ),
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.surface
+                            )
                         ) {
-                            Box(
-                                modifier = Modifier.size(120.dp),
-                                contentAlignment = Alignment.Center
+                            Column(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalAlignment = Alignment.CenterHorizontally
                             ) {
-                                GlideImage(product.thumbnail, contentDescription = null)
+                                Box(
+                                    modifier = Modifier.size(120.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    GlideImage(
+                                        model = product.thumbnail,
+                                        contentDescription = null,
+                                    )
+                                }
+                                Text(
+                                    product.category,
+                                    fontFamily = font4,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    fontSize = 19.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    textAlign = TextAlign.Center,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Text(
+                                    "${product.discountPercentage}% Discount",
+                                    fontFamily = font4,
+                                    color = Color(0, 150, 0),
+                                    fontSize = 16.sp
+                                )
+                                Spacer(modifier = Modifier.height(5.dp))
                             }
-                            Text(
-                                product.category,
-                                fontFamily = font4,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                fontSize = 19.sp,
-                                fontWeight = FontWeight.Bold,
-                                textAlign = TextAlign.Center,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                            Text(
-                                "${product.discountPercentage}% Discount",
-                                fontFamily = font4,
-                                color = Color(0, 150, 0),
-                                fontSize = 16.sp
-                            )
-                            Spacer(modifier = Modifier.height(5.dp))
                         }
                     }
                 }
@@ -157,20 +177,19 @@ class Category : ComponentActivity() {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background), // 👈 theme background
+                    .background(MaterialTheme.colorScheme.background),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = "loading...",
                     fontSize = 35.sp,
                     fontFamily = font4,
-                    color = MaterialTheme.colorScheme.onBackground, // 👈 theme text
+                    color = MaterialTheme.colorScheme.onBackground,
                     fontWeight = FontWeight.Bold
                 )
             }
         }
     }
-
     fun fetchData() {
         val url = "https://dummyjson.com/products?limit=194"
         val stringRequest =
@@ -185,16 +204,26 @@ class Category : ComponentActivity() {
         val queue = Volley.newRequestQueue(this)
         queue.add(stringRequest)
     }
-
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun topbar() {
         TopAppBar(
-            title = { Text("Shopsy", color = MaterialTheme.colorScheme.onSurface) },
-            actions = {}
-        )
-    }
+            title = {
+                Text(
+                    "Shopsy",
+                    fontSize = 30.sp,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    fontFamily = font4,
+                    fontWeight = FontWeight.ExtraLight,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.padding(start = 10.dp)
+                )
+            },
+            actions = {},
 
+            )
+    }
     @OptIn(ExperimentalMaterial3Api::class, ExperimentalGlideComposeApi::class)
     @Composable
     fun mySearchBar() {
@@ -202,14 +231,17 @@ class Category : ComponentActivity() {
         var active by remember { mutableStateOf(false) }
         val filteredItems =
             productList.filter { it.title.contains(searchQuery, ignoreCase = true) }
-
         SearchBar(
             query = searchQuery,
             onQueryChange = { searchQuery = it },
             onSearch = { active = false },
+            shape = RoundedCornerShape(12.dp),
             active = active,
             onActiveChange = { active = it },
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 5.dp),
+            windowInsets = WindowInsets(left = 0.dp, right = 0.dp, top = 0.dp, bottom = 0.dp),
             placeholder = { Text("Search", fontFamily = font4) },
             leadingIcon = {
                 Icon(
@@ -240,7 +272,8 @@ class Category : ComponentActivity() {
                                 .fillMaxWidth()
                                 .padding(10.dp),
                             onClick = {
-                                val list = ArrayList(mainProductList.filter { it.category == product.category })
+                                val list =
+                                    ArrayList(mainProductList.filter { it.category == product.category })
                                 val intent = Intent(this@Category, ProductListPage::class.java)
                                 intent.putExtra("productList", list)
                                 intent.putExtra("name", product.category)
@@ -268,14 +301,11 @@ class Category : ComponentActivity() {
             }
         }
     }
-
     val navItemList = listOf(
         NavItem("Home", Icons.Default.Home),
         NavItem("Card", Icons.Default.ShoppingCart),
         NavItem("Person", Icons.Default.Person)
     )
-    var selecetedIcon by mutableStateOf(0)
-
     @Composable
     fun bottomber() {
         NavigationBar(
@@ -287,12 +317,16 @@ class Category : ComponentActivity() {
                     onClick = { selecetedIcon = index },
                     icon = {
                         if (index == selecetedIcon) {
-                            Icon(item.icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                            Icon(
+                                item.icon,
+                                contentDescription = null,
+                                tint = Color(0xFF57BAFA)
+                            )
                         } else Icon(item.icon, contentDescription = null)
                     },
                     label = {
                         if (index == selecetedIcon) {
-                            Text(item.label, color = MaterialTheme.colorScheme.primary)
+                            Text(item.label, color = MaterialTheme.colorScheme.onSurface)
                         } else {
                             Text(item.label, color = MaterialTheme.colorScheme.onSurface)
                         }
@@ -301,7 +335,6 @@ class Category : ComponentActivity() {
             }
         }
     }
-
     data class NavItem(
         val label: String,
         val icon: ImageVector

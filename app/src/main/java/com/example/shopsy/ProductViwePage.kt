@@ -26,7 +26,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -45,21 +50,21 @@ import com.example.shopsy.ui.theme.font4
 class ProductViwePage : ComponentActivity(), PaymentResultListener {
     lateinit var product: Products
     var name = ""
-
+    @OptIn(ExperimentalMaterial3Api::class)
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
         product = intent.getSerializableExtra("product", Products::class.java) ?: Products()
-        name = intent.getStringExtra("name") ?: ""
+        name = intent.getStringExtra("name") ?: "unknown"
 
         setContent {
-            // 👇 Wrap with your Theme
             ShopsyTheme {
+                val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
                 Scaffold(
-                    modifier = Modifier.fillMaxSize(),
-                    topBar = { TopAppbar() },
+                    modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+                    topBar = { TopAppbar(scrollBehavior) },
                     bottomBar = {
                         BottomAppBar(modifier = Modifier.fillMaxWidth()) {
                             Button(
@@ -93,14 +98,13 @@ class ProductViwePage : ComponentActivity(), PaymentResultListener {
             }
         }
     }
-
     @OptIn(ExperimentalGlideComposeApi::class)
     @Preview(showSystemUi = true)
     @Composable
     fun Product() {
         var expanded by remember { mutableStateOf(false) }
+        var reviewscards by remember { mutableStateOf(false) }
         Log.d("============", "Product: $product")
-
         LazyColumn {
             item {
                 // Product Image
@@ -109,7 +113,11 @@ class ProductViwePage : ComponentActivity(), PaymentResultListener {
                         .fillMaxWidth()
                         .padding(horizontal = 7.dp)
                         .clip(RoundedCornerShape(12.dp))
-                        .border(1.dp,color = MaterialTheme.colorScheme.onBackground, shape = RoundedCornerShape(12.dp)),
+                        .border(
+                            1.dp,
+                            color = MaterialTheme.colorScheme.onBackground,
+                            shape = RoundedCornerShape(12.dp)
+                        ),
                     contentAlignment = Alignment.TopCenter
                 ) {
                     GlideImage(
@@ -122,11 +130,9 @@ class ProductViwePage : ComponentActivity(), PaymentResultListener {
                             .clip(MaterialTheme.shapes.large),
                     )
                 }
-
-                // Title
                 Text(
                     "Product : $name",
-                    fontSize = 20.sp,
+                    fontSize = 23.sp,
                     color = MaterialTheme.colorScheme.onBackground,
                     fontFamily = font4,
                     fontWeight = FontWeight.Bold,
@@ -134,51 +140,66 @@ class ProductViwePage : ComponentActivity(), PaymentResultListener {
                     overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
                     modifier = Modifier.padding(top = 10.dp, start = 9.dp)
                 )
-
                 Spacer(modifier = Modifier.padding(top = 5.dp))
-
-                // Brand + Rating
                 Row {
+                    if (product.brand != "") {
+                        Text(
+                            "Brand : ${product.brand} ",
+                            fontSize = 17.sp,
+                            fontFamily = font4,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.padding(start = 9.dp)
+                        )
+                    }else{
+                        Text(
+                            "Brand : Unknown ",
+                            fontSize = 17.sp,
+                            fontFamily = font4,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.padding(start = 9.dp)
+                        )
+                    }
                     Text(
-                        "Brand : ${product.brand} | ",
-                        fontSize = 18.sp,
-                        fontFamily = font4,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.padding(start = 9.dp)
-                    )
-                    Text(
-                        "⭐️ ${product.rating} Rating",
-                        fontSize = 18.sp,
+                        "| ⭐️ ${product.rating} Rating",
+                        fontSize = 17.sp,
                         fontFamily = font4,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                 }
-
-                // Discount + Price
                 Row(modifier = Modifier.padding(start = 10.dp, top = 5.dp)) {
                     Text(
-                        "Category : ${product.discountPercentage}% | ",
-                        fontSize = 18.sp,
-                        color = MaterialTheme.colorScheme.primary,
+                        buildAnnotatedString {
+                            append("Discount : ")
+                            withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
+                                append("${product.discountPercentage}% ")
+                            }
+                        },
+                        fontSize = 17.sp,
+                        color = MaterialTheme.colorScheme.onBackground,
                         fontFamily = font4,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        "Price : $ ${product.price}",
-                        fontSize = 18.sp,
+                        buildAnnotatedString {
+                            append("| Price : ")
+                            withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
+                                append("$ ${product.price}% ")
+                            }
+                        },
+                        fontSize = 17.sp,
                         color = MaterialTheme.colorScheme.onSurface,
                         fontFamily = font4,
                         fontWeight = FontWeight.Bold
                     )
                 }
-
                 // Quantity + Availability
                 Row(modifier = Modifier.padding(top = 5.dp, start = 9.dp)) {
                     Text(
                         "Quantity : ${product.stock}",
-                        fontSize = 18.sp,
+                        fontSize = 17.sp,
                         fontFamily = font4,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
@@ -186,23 +207,30 @@ class ProductViwePage : ComponentActivity(), PaymentResultListener {
                     Icon(
                         Icons.Default.ShoppingCartCheckout,
                         contentDescription = null,
-                        modifier = Modifier.padding(start = 7.dp, top = 3.dp),
+                        modifier = Modifier.padding(start = 5.dp, top = 2.dp),
                         tint = MaterialTheme.colorScheme.onSurface.copy(.6f)
                     )
                     Text(
                         product.availabilityStatus,
                         fontSize = 15.sp,
-                        color = MaterialTheme.colorScheme.primary,
+                        color = Color(197, 175, 24, 255),
                         fontFamily = font4,
-                        modifier = Modifier.padding(start = 6.dp, top = 4.dp)
+                        modifier = Modifier.padding(start = 5.dp, top = 1.dp)
+                    )
+                    Text(
+                        "| weight: ${product.weight}g",
+                        fontSize = 17.sp,
+                        fontFamily = font4,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.padding(start = 4.dp)
                     )
                 }
-
                 // Shipping
                 Row(modifier = Modifier.padding(top = 5.dp, start = 10.dp)) {
                     Text(
                         "Shipping : ${product.shippingInformation}",
-                        fontSize = 18.sp,
+                        fontSize = 17.sp,
                         fontFamily = font4,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
@@ -214,17 +242,31 @@ class ProductViwePage : ComponentActivity(), PaymentResultListener {
                         tint = MaterialTheme.colorScheme.onSurface.copy(.6f)
                     )
                 }
-
                 // Warranty
                 Text(
                     "Warranty : ${product.warrantyInformation}",
-                    fontSize = 18.sp,
+                    fontSize = 17.sp,
                     color = MaterialTheme.colorScheme.onSurface,
                     fontFamily = font4,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(top = 2.dp, start = 9.dp)
+                    modifier = Modifier.padding(top = 3.dp, start = 9.dp)
                 )
-
+                Text(
+                    "MinimumOrderQuantity : ${product.minimumOrderQuantity}",
+                    fontSize = 17.sp,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontFamily = font4,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(top = 4.dp, start = 9.dp)
+                )
+                Text(
+                    "ReturnPolicy: ${product.returnPolicy}",
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.onSurface.copy(.7f),
+                    fontFamily = font4,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(top = 3.dp, start = 9.dp)
+                )
                 // Expandable Description
                 Spacer(modifier = Modifier.padding(top = 15.dp))
                 Card(
@@ -261,22 +303,96 @@ class ProductViwePage : ComponentActivity(), PaymentResultListener {
                         }
                     }
                 }
+                Spacer(modifier = Modifier.padding(top = 15.dp))
+                // Reviews Header
+                Text(
+                    text = "Customer Reviews",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(start = 10.dp, top = 15.dp)
+                )
+                product.reviews.forEach { review ->
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 10.dp, vertical = 6.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        elevation = CardDefaults.cardElevation(4.dp)
+                    ) {
+                        Column(modifier = Modifier.padding(12.dp)) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = review.reviewerName,
+                                    fontFamily = font4,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 16.sp
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(text = "⭐ ${review.rating}", fontSize = 14.sp)
+                            }
+                            Text(
+                                text = review.comment,
+                                fontSize = 15.sp,
+                                fontFamily = font4,
+                                modifier = Modifier.padding(top = 4.dp)
+                            )
+                            Text(
+                                text = review.date.take(10),
+                                fontSize = 12.sp,
+                                fontFamily = font4,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 1f),
+                                modifier = Modifier.padding(top = 2.dp)
+                            )
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.padding(top = 15.dp))
+                Text(
+                    "More Details",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 22.sp,
+                    modifier = Modifier.padding(start = 10.dp)
+                )
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 10.dp, vertical = 6.dp)
+                ) {
+                    Column(Modifier.padding(12.dp)) {
+                        Text("Tags: ${product.tags.joinToString()}")
+                    }
+                }
             }
         }
     }
-
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun TopAppbar() {
+    fun TopAppbar(scrollBehavior: TopAppBarScrollBehavior) {
         TopAppBar(
             title = {
-                Text(
-                    " ${product.brand}",
-                    fontSize = 25.sp,
-                    fontFamily = font4,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onPrimary
-                )
+                if (product.brand != "") {
+                    Text(
+                        " ${product.brand}",
+                        fontSize = 30.sp,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        fontFamily = font4,
+                        fontWeight = FontWeight.ExtraLight,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.padding(start = 10.dp)
+                    )
+                } else {
+                    Text(
+                        "Unknown",
+                        fontSize = 30.sp,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        fontFamily = font4,
+                        fontWeight = FontWeight.ExtraLight,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.padding(start = 10.dp)
+                    )
+                }
             },
             navigationIcon = {
                 IconButton(onClick = { finish() }) {
@@ -286,9 +402,9 @@ class ProductViwePage : ComponentActivity(), PaymentResultListener {
                     )
                 }
             },
+            scrollBehavior = scrollBehavior
         )
     }
-
     private fun doPurchase(amount: Int) {
         val amountPaise = Math.round(amount.toFloat() * 100)
         val checkout = Checkout()
@@ -298,7 +414,7 @@ class ProductViwePage : ComponentActivity(), PaymentResultListener {
             jsonObject.put("name", "First Payment")
             jsonObject.put("description", "Test payment compose Integration")
             jsonObject.put("currency", "INR")
-            jsonObject.put("amount", amountPaise)
+            jsonObject.put("amount", 15000)
             jsonObject.put("prefill.contact", "9106597990")
             jsonObject.put("prefill.email", "test@gmail.com")
 
@@ -308,12 +424,13 @@ class ProductViwePage : ComponentActivity(), PaymentResultListener {
             e.printStackTrace()
         }
     }
-
     override fun onPaymentSuccess(p0: String?) {
         Toast.makeText(this, "Payment Success ✅", Toast.LENGTH_SHORT).show()
     }
-
     override fun onPaymentError(p0: Int, p1: String?) {
+        Log.d("=====", "onPaymentError: p0 :: $p0")
+        Log.d("=====", "onPaymentError: p1 :: $p1")
         Toast.makeText(this, "Payment Failed ❌", Toast.LENGTH_SHORT).show()
     }
+
 }
