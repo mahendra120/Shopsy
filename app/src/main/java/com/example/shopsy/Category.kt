@@ -15,11 +15,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.Card
@@ -29,6 +33,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
@@ -44,31 +50,25 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.android.volley.Request
-import com.android.volley.Response
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.example.shopsy.Data.Product
 import com.example.shopsy.Data.Products
+import com.example.shopsy.ui.theme.ShopsyTheme
 import com.example.shopsy.ui.theme.font4
 import com.google.gson.Gson
-
-
 class Category : ComponentActivity() {
-    //    val productList = ArrayList<Products>()
-//    var categoryList = mutableStateListOf<String>()
-
-
     val productList = mutableStateListOf<Products>()
     var mainProductList = ArrayList<Products>(0)
-
 
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -76,17 +76,19 @@ class Category : ComponentActivity() {
         enableEdgeToEdge()
         fetchData()
         setContent {
-            Scaffold(
-                topBar = {
-                    topbar()
-                }) { innerPadding ->
-                mySearchBar()
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(innerPadding)
-                ) {
-                    categoryScreen(modifier = Modifier)
+            ShopsyTheme {   // 👈 wrap everything in theme
+                Scaffold(
+                    topBar = { topbar() },
+                    bottomBar = { bottomber() }
+                ) { innerPadding ->
+                    mySearchBar()
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(innerPadding)
+                    ) {
+                        categoryScreen(modifier = Modifier)
+                    }
                 }
             }
         }
@@ -101,50 +103,52 @@ class Category : ComponentActivity() {
                     val product = productList[index]
                     Card(
                         onClick = {
-                            var list =
+                            val list =
                                 ArrayList(mainProductList.filter { it.category == product.category })
-                            Log.d("=====", "categoryScreen: $list")
-                            var intent = Intent(this@Category, ProductListPage::class.java)
+                            val intent = Intent(this@Category, ProductListPage::class.java)
                             intent.putExtra("productList", list)
                             intent.putExtra("name", product.category)
                             startActivity(intent)
                         },
                         modifier = Modifier
-                            .fillMaxSize()
-                            .clip(shape = RoundedCornerShape(12.dp))
+                            .clip(RoundedCornerShape(12.dp))
                             .padding(horizontal = 10.dp, vertical = 5.dp)
-                            .border(1.dp, color = Color.Black, shape = RoundedCornerShape(12.dp)),
-                        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
+                            .border(
+                                1.dp,
+                                MaterialTheme.colorScheme.onBackground, // 👈 respect theme
+                                RoundedCornerShape(12.dp)
+                            ),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surface
+                        )
                     ) {
-                        Column(modifier.fillMaxSize()) {
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
                             Box(
-                                modifier = Modifier.fillMaxSize(),
+                                modifier = Modifier.size(120.dp),
                                 contentAlignment = Alignment.Center
                             ) {
                                 GlideImage(product.thumbnail, contentDescription = null)
                             }
-                            Box(
-                                modifier = Modifier.fillMaxWidth(),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    Text(
-                                        product.category,
-                                        fontFamily = font4,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis,
-                                        fontSize = 19.sp,
-                                        fontWeight = FontWeight.Bold, textAlign = TextAlign.Center
-                                    )
-                                    Text(
-                                        "${product.discountPercentage}% Discount",
-                                        fontFamily = font4,
-                                        color = Color(0, 100, 0),
-                                        fontSize = 16.sp
-                                    )
-                                    Spacer(modifier = Modifier.height(5.dp))
-                                }
-                            }
+                            Text(
+                                product.category,
+                                fontFamily = font4,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                fontSize = 19.sp,
+                                fontWeight = FontWeight.Bold,
+                                textAlign = TextAlign.Center,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                "${product.discountPercentage}% Discount",
+                                fontFamily = font4,
+                                color = Color(0, 150, 0),
+                                fontSize = 16.sp
+                            )
+                            Spacer(modifier = Modifier.height(5.dp))
                         }
                     }
                 }
@@ -153,17 +157,15 @@ class Category : ComponentActivity() {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding()
-                    .background(Color.White),
+                    .background(MaterialTheme.colorScheme.background), // 👈 theme background
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = "loading...",
                     fontSize = 35.sp,
                     fontFamily = font4,
-                    color = Color.Black,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding()
+                    color = MaterialTheme.colorScheme.onBackground, // 👈 theme text
+                    fontWeight = FontWeight.Bold
                 )
             }
         }
@@ -173,28 +175,13 @@ class Category : ComponentActivity() {
         val url = "https://dummyjson.com/products?limit=194"
         val stringRequest =
             StringRequest(Request.Method.GET, url, { response ->
-                var apiResponse = response
-                val productMode = Gson().fromJson(response.toString(), Product::class.java)
+                val productMode = Gson().fromJson(response, Product::class.java)
                 productList.clear()
-//                productList.addAll(productMode.products)
-//                    way - 1
-//                productList.forEach {
-//                    if (!categoryList.contains(it.category)) {
-//                        categoryList.add(it.category)
-//                    }
-//                }
-                //way - 2
-//                productList.addAll(mainProductList.filter {
-//                    productList.find { p -> p.category == it.category } == null
-//                })
-                //way - 3
                 mainProductList = productMode.products
                 productList.addAll(mainProductList.distinctBy { it.category })
-
             }, {
                 Log.d("=====", "fetchData: That didn't work!")
             })
-
         val queue = Volley.newRequestQueue(this)
         queue.add(stringRequest)
     }
@@ -203,10 +190,8 @@ class Category : ComponentActivity() {
     @Composable
     fun topbar() {
         TopAppBar(
-            title = {
-                Text("Shopsy")
-            },
-            actions = {},
+            title = { Text("Shopsy", color = MaterialTheme.colorScheme.onSurface) },
+            actions = {}
         )
     }
 
@@ -217,21 +202,20 @@ class Category : ComponentActivity() {
         var active by remember { mutableStateOf(false) }
         val filteredItems =
             productList.filter { it.title.contains(searchQuery, ignoreCase = true) }
+
         SearchBar(
             query = searchQuery,
             onQueryChange = { searchQuery = it },
             onSearch = { active = false },
             active = active,
             onActiveChange = { active = it },
-            modifier = Modifier
-//                .padding(start = 12.dp, top = 2.dp, end = 12.dp, bottom = 12.dp)
-                .fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             placeholder = { Text("Search", fontFamily = font4) },
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Rounded.Search,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             },
             trailingIcon = {
@@ -240,48 +224,43 @@ class Category : ComponentActivity() {
                         searchQuery = ""
                         active = false
                     }) {
-                        Icon(
-                            imageVector = Icons.Rounded.Close,
-                            contentDescription = null
-                        )
+                        Icon(imageVector = Icons.Rounded.Close, contentDescription = null)
                     }
             },
             colors = SearchBarDefaults.colors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                containerColor = MaterialTheme.colorScheme.surface,
             ),
             tonalElevation = 0.dp,
         ) {
             LazyColumn {
                 item {
-                    filteredItems.forEach { index ->
+                    filteredItems.forEach { product ->
                         ElevatedCard(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(10.dp),
                             onClick = {
-                                val product = index
-                                var list =
-                                    ArrayList(mainProductList.filter { it.category == product.category })
-                                Log.d("=====", "categoryScreen: $list")
-                                var intent = Intent(this@Category, ProductListPage::class.java)
+                                val list = ArrayList(mainProductList.filter { it.category == product.category })
+                                val intent = Intent(this@Category, ProductListPage::class.java)
                                 intent.putExtra("productList", list)
                                 intent.putExtra("name", product.category)
                                 startActivity(intent)
                             }
                         ) {
                             Text(
-                                index.title,
+                                product.title,
                                 fontSize = 15.sp,
                                 fontFamily = font4,
                                 fontWeight = FontWeight.Bold,
-                                modifier = Modifier.padding(start = 10.dp, top = 10.dp)
+                                modifier = Modifier.padding(10.dp),
+                                color = MaterialTheme.colorScheme.onSurface
                             )
                             Text(
-                                index.category,
+                                product.category,
                                 fontSize = 12.sp,
                                 fontFamily = font4,
-                                fontWeight = FontWeight.Bold,
-                                modifier = Modifier.padding(10.dp)
+                                modifier = Modifier.padding(start = 10.dp, bottom = 10.dp),
+                                color = MaterialTheme.colorScheme.primary,
                             )
                         }
                     }
@@ -289,4 +268,42 @@ class Category : ComponentActivity() {
             }
         }
     }
+
+    val navItemList = listOf(
+        NavItem("Home", Icons.Default.Home),
+        NavItem("Card", Icons.Default.ShoppingCart),
+        NavItem("Person", Icons.Default.Person)
+    )
+    var selecetedIcon by mutableStateOf(0)
+
+    @Composable
+    fun bottomber() {
+        NavigationBar(
+            containerColor = MaterialTheme.colorScheme.surface
+        ) {
+            navItemList.forEachIndexed { index, item ->
+                NavigationBarItem(
+                    selected = index == selecetedIcon,
+                    onClick = { selecetedIcon = index },
+                    icon = {
+                        if (index == selecetedIcon) {
+                            Icon(item.icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                        } else Icon(item.icon, contentDescription = null)
+                    },
+                    label = {
+                        if (index == selecetedIcon) {
+                            Text(item.label, color = MaterialTheme.colorScheme.primary)
+                        } else {
+                            Text(item.label, color = MaterialTheme.colorScheme.onSurface)
+                        }
+                    }
+                )
+            }
+        }
+    }
+
+    data class NavItem(
+        val label: String,
+        val icon: ImageVector
+    )
 }
