@@ -201,7 +201,7 @@ class ProductListPage : ComponentActivity() {
                     fontWeight = FontWeight.ExtraLight,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.padding(start = 10.dp)
+                    modifier = Modifier.padding(start = 15.dp)
                 )
             },
             navigationIcon = {

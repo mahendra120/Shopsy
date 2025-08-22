@@ -17,14 +17,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
@@ -45,6 +41,8 @@ import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -56,6 +54,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -85,10 +84,11 @@ class Category : ComponentActivity() {
         enableEdgeToEdge()
         fetchData()
         setContent {
+            val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
             ShopsyTheme {
                 Scaffold(
-                    modifier = Modifier.fillMaxWidth(),
-                    topBar = { topbar() },
+                    modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+                    topBar = { topbar(scrollBehavior) },
                     bottomBar = { bottomber() }
                 ) { innerPadding ->
                     Box(
@@ -96,7 +96,6 @@ class Category : ComponentActivity() {
                             .fillMaxSize()
                             .padding(innerPadding)
                     ) {
-//                        categoryScreen(modifier = Modifier)
                         when (selecetedIcon) {
                             0 -> categoryScreen(modifier = Modifier)
                             1 -> CardScreen(modifier = Modifier)
@@ -190,6 +189,7 @@ class Category : ComponentActivity() {
             }
         }
     }
+
     fun fetchData() {
         val url = "https://dummyjson.com/products?limit=194"
         val stringRequest =
@@ -204,26 +204,30 @@ class Category : ComponentActivity() {
         val queue = Volley.newRequestQueue(this)
         queue.add(stringRequest)
     }
+
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun topbar() {
+    fun topbar(scrollBehavior: TopAppBarScrollBehavior) {
         TopAppBar(
             title = {
                 Text(
                     "Shopsy",
-                    fontSize = 30.sp,
+                    fontSize = 35.sp,
                     color = MaterialTheme.colorScheme.onBackground,
                     fontFamily = font4,
-                    fontWeight = FontWeight.ExtraLight,
+                    fontWeight = FontWeight.ExtraBold,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.padding(start = 10.dp)
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(start = 30.dp)
                 )
             },
+            scrollBehavior = scrollBehavior,
             actions = {},
 
             )
     }
+
     @OptIn(ExperimentalMaterial3Api::class, ExperimentalGlideComposeApi::class)
     @Composable
     fun mySearchBar() {
@@ -301,11 +305,13 @@ class Category : ComponentActivity() {
             }
         }
     }
+
     val navItemList = listOf(
         NavItem("Home", Icons.Default.Home),
         NavItem("Card", Icons.Default.ShoppingCart),
         NavItem("Person", Icons.Default.Person)
     )
+
     @Composable
     fun bottomber() {
         NavigationBar(
@@ -335,6 +341,7 @@ class Category : ComponentActivity() {
             }
         }
     }
+
     data class NavItem(
         val label: String,
         val icon: ImageVector

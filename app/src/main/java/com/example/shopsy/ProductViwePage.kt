@@ -46,10 +46,12 @@ import org.json.JSONObject
 // 👇 Import your theme + font
 import com.example.shopsy.ui.theme.ShopsyTheme
 import com.example.shopsy.ui.theme.font4
+import kotlin.math.roundToInt
 
 class ProductViwePage : ComponentActivity(), PaymentResultListener {
     lateinit var product: Products
     var name = ""
+
     @OptIn(ExperimentalMaterial3Api::class)
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -68,7 +70,7 @@ class ProductViwePage : ComponentActivity(), PaymentResultListener {
                     bottomBar = {
                         BottomAppBar(modifier = Modifier.fillMaxWidth()) {
                             Button(
-                                onClick = { doPurchase(100) },
+                                onClick = { doPurchase(product.price!!.toFloat() * 100 ) },
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .padding(15.dp),
@@ -98,6 +100,7 @@ class ProductViwePage : ComponentActivity(), PaymentResultListener {
             }
         }
     }
+
     @OptIn(ExperimentalGlideComposeApi::class)
     @Preview(showSystemUi = true)
     @Composable
@@ -107,7 +110,6 @@ class ProductViwePage : ComponentActivity(), PaymentResultListener {
         Log.d("============", "Product: $product")
         LazyColumn {
             item {
-                // Product Image
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -151,7 +153,7 @@ class ProductViwePage : ComponentActivity(), PaymentResultListener {
                             color = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.padding(start = 9.dp)
                         )
-                    }else{
+                    } else {
                         Text(
                             "Brand : Unknown ",
                             fontSize = 17.sp,
@@ -186,7 +188,7 @@ class ProductViwePage : ComponentActivity(), PaymentResultListener {
                         buildAnnotatedString {
                             append("| Price : ")
                             withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
-                                append("$ ${product.price}% ")
+                                append("$ ${product.price} ")
                             }
                         },
                         fontSize = 17.sp,
@@ -365,6 +367,7 @@ class ProductViwePage : ComponentActivity(), PaymentResultListener {
             }
         }
     }
+
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun TopAppbar(scrollBehavior: TopAppBarScrollBehavior) {
@@ -405,16 +408,17 @@ class ProductViwePage : ComponentActivity(), PaymentResultListener {
             scrollBehavior = scrollBehavior
         )
     }
-    private fun doPurchase(amount: Int) {
-        val amountPaise = Math.round(amount.toFloat() * 100)
+
+    private fun doPurchase(amount: Float) {
+        val amountPaise = (amount * 100)
         val checkout = Checkout()
-        checkout.setKeyID("rzp_test_CKxIMtjjMGCpJo")
+        checkout.setKeyID("rzp_test_Dd5eud3a91mnti")
         val jsonObject = JSONObject()
         try {
             jsonObject.put("name", "First Payment")
             jsonObject.put("description", "Test payment compose Integration")
-            jsonObject.put("currency", "INR")
-            jsonObject.put("amount", 15000)
+            jsonObject.put("currency", "USD")
+            jsonObject.put("amount", amount)
             jsonObject.put("prefill.contact", "9106597990")
             jsonObject.put("prefill.email", "test@gmail.com")
 
@@ -424,9 +428,11 @@ class ProductViwePage : ComponentActivity(), PaymentResultListener {
             e.printStackTrace()
         }
     }
+
     override fun onPaymentSuccess(p0: String?) {
         Toast.makeText(this, "Payment Success ✅", Toast.LENGTH_SHORT).show()
     }
+
     override fun onPaymentError(p0: Int, p1: String?) {
         Log.d("=====", "onPaymentError: p0 :: $p0")
         Log.d("=====", "onPaymentError: p1 :: $p1")

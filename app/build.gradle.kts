@@ -58,13 +58,18 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
     //volley api
     implementation("com.android.volley:volley:1.2.1")
-
     implementation("com.google.code.gson:gson:2.11.0")
-
     implementation("com.github.bumptech.glide:compose:1.0.0-beta01")
-
-    implementation ("androidx.media3:media3-ui:1.7.1")
+    implementation("androidx.media3:media3-ui:1.7.1")
     implementation("io.coil-kt:coil-compose:2.4.0")
-    implementation ("androidx.compose.material:material-icons-extended:<version>")
-    implementation ("com.razorpay:checkout:1.6.40")
+    implementation("androidx.compose.material:material-icons-extended:<version>")
+    implementation("com.razorpay:checkout:1.6.40")
+    // retrofit
+
+    implementation("com.squareup.retrofit2:retrofit:2.11.0")
+    // gson converter
+    implementation("com.squareup.retrofit2:converter-gson:2.11.0")
+
+    implementation ("com.google.accompanist:accompanist-pager:0.30.1")
+    implementation ("com.google.accompanist:accompanist-pager-indicators:0.30.1")
 }

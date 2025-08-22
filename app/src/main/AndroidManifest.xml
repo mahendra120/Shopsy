@@ -15,6 +15,11 @@
         android:theme="@style/Theme.Shopsy"
         tools:targetApi="31">
         <activity
+            android:name=".Category"
+            android:exported="false"
+            android:label="@string/title_activity_retrofit"
+            android:theme="@style/Theme.Shopsy" />
+        <activity
             android:name=".ProductListPage"
             android:exported="false"
             android:label="@string/title_activity_product_viwe_page"
@@ -30,7 +35,7 @@
             android:label="@string/title_activity_category"
             android:theme="@style/Theme.Shopsy" />
         <activity
-            android:name=".Category"
+            android:name=".Retrofir.RetrofitActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.Shopsy">
