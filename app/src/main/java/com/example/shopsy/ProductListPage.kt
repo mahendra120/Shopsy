@@ -8,6 +8,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -43,6 +44,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -109,7 +111,7 @@ class ProductListPage : ComponentActivity() {
                         .clip(shape = RoundedCornerShape(12.dp))
                         .border(
                             1.dp,
-                            color = MaterialTheme.colorScheme.onBackground,
+                            color =  Color(0xFF2479B2),
                             shape = RoundedCornerShape(12.dp)
                         ),
                     colors = CardDefaults.cardColors(containerColor = Color.Transparent)
@@ -149,7 +151,7 @@ class ProductListPage : ComponentActivity() {
                                     fontFamily = font4,
                                     fontSize = 15.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = Color(253, 253, 0)
+                                    color = Color(0xFF4F46E5)
                                 )
                             }
                             Text(
@@ -192,17 +194,8 @@ class ProductListPage : ComponentActivity() {
     @Composable
     fun TopAppbar(scrollBehavior: TopAppBarScrollBehavior) {
         TopAppBar(
-            title = {
-                Text(
-                    name,
-                    fontSize = 30.sp,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    fontFamily = font4,
-                    fontWeight = FontWeight.ExtraLight,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.padding(start = 15.dp)
-                )
+            title ={
+                Image(painter = painterResource(R.drawable.shopsy), contentDescription = null)
             },
             navigationIcon = {
                 IconButton(onClick = {

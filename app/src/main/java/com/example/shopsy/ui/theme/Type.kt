@@ -22,6 +22,9 @@ val font2 = FontFamily(
 val font4 = FontFamily(
     Font(R.font.tooto, FontWeight.Normal),
 )
+val quicksand = FontFamily(
+    Font(R.font.tooto, FontWeight.Normal),
+)
 val Typography = Typography(
     bodyLarge = TextStyle(
         fontFamily = FontFamily.Default,

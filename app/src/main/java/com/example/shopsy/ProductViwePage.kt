@@ -16,6 +16,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.AllInbox
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.LocalShipping
@@ -70,7 +71,7 @@ class ProductViwePage : ComponentActivity(), PaymentResultListener {
                     bottomBar = {
                         BottomAppBar(modifier = Modifier.fillMaxWidth()) {
                             Button(
-                                onClick = { doPurchase(product.price!!.toFloat() * 100 ) },
+                                onClick = { doPurchase(product.price!!.toFloat() * 100) },
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .padding(15.dp),
@@ -106,9 +107,8 @@ class ProductViwePage : ComponentActivity(), PaymentResultListener {
     @Composable
     fun Product() {
         var expanded by remember { mutableStateOf(false) }
-        var reviewscards by remember { mutableStateOf(false) }
         Log.d("============", "Product: $product")
-        LazyColumn {
+        LazyColumn{
             item {
                 Box(
                     modifier = Modifier
@@ -116,8 +116,8 @@ class ProductViwePage : ComponentActivity(), PaymentResultListener {
                         .padding(horizontal = 7.dp)
                         .clip(RoundedCornerShape(12.dp))
                         .border(
-                            1.dp,
-                            color = MaterialTheme.colorScheme.onBackground,
+                            2.dp,
+                            color = Color(0xFF4F46E5),
                             shape = RoundedCornerShape(12.dp)
                         ),
                     contentAlignment = Alignment.TopCenter
@@ -132,143 +132,189 @@ class ProductViwePage : ComponentActivity(), PaymentResultListener {
                             .clip(MaterialTheme.shapes.large),
                     )
                 }
-                Text(
-                    "Product : $name",
-                    fontSize = 23.sp,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    fontFamily = font4,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 1,
-                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
-                    modifier = Modifier.padding(top = 10.dp, start = 9.dp)
-                )
-                Spacer(modifier = Modifier.padding(top = 5.dp))
-                Row {
-                    if (product.brand != "") {
+                Column(modifier = Modifier.padding(start = 2.dp)){
+                    Text(
+                        buildAnnotatedString {
+                            withStyle(style = SpanStyle(color = Color(0xFF4F46E5))) {
+                                append("Product : ")
+                            }
+                            append(name)
+                        },
+                        fontSize = 24.sp,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        fontFamily = font4,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                        modifier = Modifier.padding(top = 10.dp, start = 9.dp)
+                    )
+                    Spacer(modifier = Modifier.padding(top = 5.dp))
+                    Row {
+                        if (product.brand != "") {
+                            Text(
+                                buildAnnotatedString {
+                                    withStyle(style = SpanStyle()) {
+                                        append("Brand : ")
+                                    }
+                                    append(if (product.brand != "") product.brand else "Unknown")
+                                },
+                                fontSize = 17.sp,
+                                fontFamily = font4,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(start = 9.dp)
+                            )
+                        } else {
+                            Text(
+                                buildAnnotatedString {
+                                    withStyle(style = SpanStyle()) {
+                                        append("Brand : ")
+                                    }
+                                    append("Unknown")
+                                },
+                                fontSize = 17.sp,
+                                fontFamily = font4,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(start = 9.dp)
+                            )
+                        }
                         Text(
-                            "Brand : ${product.brand} ",
+                            " | ⭐️ ${product.rating} Rating",
                             fontSize = 17.sp,
                             fontFamily = font4,
                             fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier.padding(start = 9.dp)
+                            color = MaterialTheme.colorScheme.onSurface
                         )
-                    } else {
+                    }
+                    Row(modifier = Modifier.padding(start = 10.dp, top = 5.dp)) {
                         Text(
-                            "Brand : Unknown ",
+                            buildAnnotatedString {
+                                append("Discount : ")
+                                withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
+                                    append("${product.discountPercentage}% ")
+                                }
+                            },
+                            fontSize = 17.sp,
+                            fontFamily = font4,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            buildAnnotatedString {
+                                append("| Price : ")
+                                withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
+                                    append("$ ${product.price} ")
+                                }
+                            },
+                            fontSize = 17.sp,
+                            fontFamily = font4,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    // Quantity + Availability
+                    Row(modifier = Modifier.padding(top = 5.dp, start = 9.dp)) {
+                        Text(
+                            buildAnnotatedString {
+                                withStyle(style = SpanStyle()) {
+                                    append("Quantity : ")
+                                }
+                                append("${product.stock}")
+                            },
+                            fontSize = 17.sp,
+                            fontFamily = font4,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Icon(
+                            Icons.Default.ShoppingCartCheckout,
+                            contentDescription = null,
+                            modifier = Modifier.padding(start = 5.dp, top = 2.dp),
+                            tint = MaterialTheme.colorScheme.onSurface.copy(.6f)
+                        )
+                        Text(
+                            product.availabilityStatus,
+                            fontSize = 15.sp,
+                            color = Color(197, 175, 24, 255),
+                            fontFamily = font4,
+                            modifier = Modifier.padding(start = 5.dp, top = 1.dp)
+                        )
+                        Text(
+                            "| weight: ${product.weight}g",
                             fontSize = 17.sp,
                             fontFamily = font4,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier.padding(start = 9.dp)
+                            modifier = Modifier.padding(start = 4.dp)
+                        )
+                    }
+                    // Shipping
+                    Row(modifier = Modifier.padding(top = 5.dp, start = 10.dp)) {
+                        Text(
+                            buildAnnotatedString {
+                                withStyle(style = SpanStyle()) {
+                                    append("Shipping : ")
+                                }
+                                append(product.shippingInformation)
+                            },
+                            fontSize = 17.sp,
+                            fontFamily = font4,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Icon(
+                            Icons.Default.LocalShipping,
+                            contentDescription = null,
+                            modifier = Modifier.padding(start = 7.dp, top = 3.dp),
+                            tint = MaterialTheme.colorScheme.onSurface.copy(.6f)
+                        )
+                    }
+                    // Warranty
+                    Text(
+                        buildAnnotatedString {
+                            withStyle(style = SpanStyle()) {
+                                append("Warranty : ")
+                            }
+                            append(product.warrantyInformation)
+                        },
+                        fontSize = 17.sp,
+                        fontFamily = font4,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(top = 3.dp, start = 9.dp)
+                    )
+                    Row {
+                        Text(
+                            buildAnnotatedString {
+                                withStyle(style = SpanStyle()) {
+                                    append("MinimumOrderQuantity : ")
+                                }
+                                append("${product.minimumOrderQuantity}")
+                            },
+                            fontSize = 17.sp,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            fontFamily = font4,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(top = 4.dp, start = 9.dp)
+                        )
+                        Icon(
+                            Icons.Default.AllInbox,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(30.dp)
+                                .padding(start = 10.dp),
+                            tint = Color.Gray
                         )
                     }
                     Text(
-                        "| ⭐️ ${product.rating} Rating",
-                        fontSize = 17.sp,
-                        fontFamily = font4,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                }
-                Row(modifier = Modifier.padding(start = 10.dp, top = 5.dp)) {
-                    Text(
                         buildAnnotatedString {
-                            append("Discount : ")
-                            withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
-                                append("${product.discountPercentage}% ")
+                            withStyle(style = SpanStyle()) {
+                                append("ReturnPolicy : ")
                             }
+                            append(product.returnPolicy)
                         },
-                        fontSize = 17.sp,
-                        color = MaterialTheme.colorScheme.onBackground,
-                        fontFamily = font4,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        buildAnnotatedString {
-                            append("| Price : ")
-                            withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
-                                append("$ ${product.price} ")
-                            }
-                        },
-                        fontSize = 17.sp,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        fontFamily = font4,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-                // Quantity + Availability
-                Row(modifier = Modifier.padding(top = 5.dp, start = 9.dp)) {
-                    Text(
-                        "Quantity : ${product.stock}",
-                        fontSize = 17.sp,
+                        fontSize = 14.sp,
                         fontFamily = font4,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Icon(
-                        Icons.Default.ShoppingCartCheckout,
-                        contentDescription = null,
-                        modifier = Modifier.padding(start = 5.dp, top = 2.dp),
-                        tint = MaterialTheme.colorScheme.onSurface.copy(.6f)
-                    )
-                    Text(
-                        product.availabilityStatus,
-                        fontSize = 15.sp,
-                        color = Color(197, 175, 24, 255),
-                        fontFamily = font4,
-                        modifier = Modifier.padding(start = 5.dp, top = 1.dp)
-                    )
-                    Text(
-                        "| weight: ${product.weight}g",
-                        fontSize = 17.sp,
-                        fontFamily = font4,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.padding(start = 4.dp)
+                        modifier = Modifier.padding(top = 3.dp, start = 9.dp)
                     )
                 }
-                // Shipping
-                Row(modifier = Modifier.padding(top = 5.dp, start = 10.dp)) {
-                    Text(
-                        "Shipping : ${product.shippingInformation}",
-                        fontSize = 17.sp,
-                        fontFamily = font4,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Icon(
-                        Icons.Default.LocalShipping,
-                        contentDescription = null,
-                        modifier = Modifier.padding(start = 7.dp, top = 3.dp),
-                        tint = MaterialTheme.colorScheme.onSurface.copy(.6f)
-                    )
-                }
-                // Warranty
-                Text(
-                    "Warranty : ${product.warrantyInformation}",
-                    fontSize = 17.sp,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    fontFamily = font4,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(top = 3.dp, start = 9.dp)
-                )
-                Text(
-                    "MinimumOrderQuantity : ${product.minimumOrderQuantity}",
-                    fontSize = 17.sp,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    fontFamily = font4,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(top = 4.dp, start = 9.dp)
-                )
-                Text(
-                    "ReturnPolicy: ${product.returnPolicy}",
-                    fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.onSurface.copy(.7f),
-                    fontFamily = font4,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(top = 3.dp, start = 9.dp)
-                )
                 // Expandable Description
                 Spacer(modifier = Modifier.padding(top = 15.dp))
                 Card(
@@ -377,20 +423,20 @@ class ProductViwePage : ComponentActivity(), PaymentResultListener {
                     Text(
                         " ${product.brand}",
                         fontSize = 30.sp,
-                        color = MaterialTheme.colorScheme.onBackground,
+                        color =  Color(0xFF4F46E5),
                         fontFamily = font4,
-                        fontWeight = FontWeight.ExtraLight,
+                        fontWeight = FontWeight.ExtraBold,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.padding(start = 10.dp)
+                        modifier = Modifier.padding(start = 0.dp)
                     )
                 } else {
                     Text(
                         "Unknown",
                         fontSize = 30.sp,
-                        color = MaterialTheme.colorScheme.onBackground,
+                        color =  Color(0xFF4F46E5),
                         fontFamily = font4,
-                        fontWeight = FontWeight.ExtraLight,
+                        fontWeight = FontWeight.ExtraBold,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.padding(start = 10.dp)
@@ -400,8 +446,7 @@ class ProductViwePage : ComponentActivity(), PaymentResultListener {
             navigationIcon = {
                 IconButton(onClick = { finish() }) {
                     Icon(
-                        Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onPrimary
+                        Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null
                     )
                 }
             },
@@ -428,6 +473,7 @@ class ProductViwePage : ComponentActivity(), PaymentResultListener {
             e.printStackTrace()
         }
     }
+
 
     override fun onPaymentSuccess(p0: String?) {
         Toast.makeText(this, "Payment Success ✅", Toast.LENGTH_SHORT).show()

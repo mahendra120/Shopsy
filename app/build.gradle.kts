@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    id("com.google.devtools.ksp")
 }
 
 android {
@@ -56,6 +57,18 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    val room_version = "2.7.2"
+    implementation("androidx.room:room-runtime:$room_version")
+    ksp("androidx.room:room-compiler:$room_version")
+    // If this project only                    uses Java source, use the Java annotationProcessor
+    // No additional plugins are necessary
+    annotationProcessor("androidx.room:room-compiler:$room_version")
+    implementation("com.android.volley:volley:1.2.1")
+
+    implementation("com.google.code.gson:gson:2.11.0")
+    implementation("com.github.bumptech.glide:compose:1.0.0-beta01")
+
     //volley api
     implementation("com.android.volley:volley:1.2.1")
     implementation("com.google.code.gson:gson:2.11.0")
@@ -72,4 +85,9 @@ dependencies {
 
     implementation ("com.google.accompanist:accompanist-pager:0.30.1")
     implementation ("com.google.accompanist:accompanist-pager-indicators:0.30.1")
+
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
+
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.9.2")
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.9.2")
 }

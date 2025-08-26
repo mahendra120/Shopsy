@@ -4,4 +4,6 @@
     <string name="title_activity_category">Category</string>
     <string name="title_activity_product_viwe_page">ProductViwePage</string>
     <string name="title_activity_retrofit">RetrofitActivity</string>
+    <string name="title_activity_login">LoginActivity</string>
+    <string name="title_activity_signup">SignupActivity</string>
 </resources>
