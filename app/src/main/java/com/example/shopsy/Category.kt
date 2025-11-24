@@ -92,11 +92,14 @@ class Category : ComponentActivity() {
     var mainProductList = ArrayList<Products>(0)
     var selecetedIcon by mutableStateOf(0)
 
+
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         fetchData()
+        AdManager.init(this)
+
         setContent {
             val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
             ShopsyTheme {
@@ -112,7 +115,7 @@ class Category : ComponentActivity() {
                         when (selecetedIcon) {
                             0 -> CategoryScreen(modifier = Modifier)
                             1 -> CardScreen(modifier = Modifier)
-                            2 -> ParsonScreen(modifier = Modifier,this@Category)
+                            2 -> ParsonScreen(modifier = Modifier, this@Category)
                         }
                     }
                 }
@@ -136,10 +139,13 @@ class Category : ComponentActivity() {
                             onClick = {
                                 val list =
                                     ArrayList(mainProductList.filter { it.category == product.category })
-                                val intent = Intent(this@Category, ProductListPage::class.java)
-                                intent.putExtra("productList", list)
-                                intent.putExtra("name", product.category)
-                                startActivity(intent)
+                                val kok = product.category
+                                AdManager.showInterstitialAd(this@Category) {
+                                    val intent = Intent(this@Category, ProductListPage::class.java)
+                                    intent.putExtra("productList", list)
+                                    intent.putExtra("name", product)
+                                    startActivity(intent)
+                                }
                             },
                             modifier = Modifier
                                 .clip(RoundedCornerShape(12.dp))
@@ -246,11 +252,12 @@ class Category : ComponentActivity() {
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
                     .padding(8.dp),
-                activeColor = Color(0xFF4F46E5),       // color for the active dot
+                activeColor = Color(0xFF4F46E5),
                 inactiveColor = Color.LightGray
             )
         }
     }
+
 
     fun fetchData() {
         val url = "https://dummyjson.com/products?limit=194"
@@ -279,8 +286,7 @@ class Category : ComponentActivity() {
             },
             scrollBehavior = scrollBehavior,
             actions = {},
-
-            )
+        )
     }
 
     @OptIn(ExperimentalMaterial3Api::class, ExperimentalGlideComposeApi::class)
@@ -409,7 +415,6 @@ class Category : ComponentActivity() {
             }
         }
     }
-
     data class NavItem(
         val label: String, val icon: ImageVector
     )

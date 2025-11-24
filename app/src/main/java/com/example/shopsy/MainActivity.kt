@@ -49,7 +49,6 @@ import com.google.gson.Gson
 class MainActivity : ComponentActivity() {
     var apiResponse by mutableStateOf("")
     var productList = mutableStateListOf<Products>()
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -92,10 +91,10 @@ class MainActivity : ComponentActivity() {
     fun fetchData() {
         val url = "https://dummyjson.com/products"
         val stringRequest =
-            object : StringRequest(Request.Method.GET, url, Response.Listener<String> { response ->
+            object : StringRequest(Method.GET, url, Response.Listener { response ->
                 Log.d("65689", "fetchData: $response")
                 apiResponse = response
-                var userMode: Product = Gson().fromJson(apiResponse, Product::class.java)
+                val userMode: Product = Gson().fromJson(apiResponse, Product::class.java)
                 productList.addAll(userMode.products)
                 Log.d("89562132", "fetchData: $productList")
             }, Response.ErrorListener {

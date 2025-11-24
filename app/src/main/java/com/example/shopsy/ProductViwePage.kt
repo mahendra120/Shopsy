@@ -108,7 +108,7 @@ class ProductViwePage : ComponentActivity(), PaymentResultListener {
     fun Product() {
         var expanded by remember { mutableStateOf(false) }
         Log.d("============", "Product: $product")
-        LazyColumn{
+        LazyColumn {
             item {
                 Box(
                     modifier = Modifier
@@ -132,7 +132,7 @@ class ProductViwePage : ComponentActivity(), PaymentResultListener {
                             .clip(MaterialTheme.shapes.large),
                     )
                 }
-                Column(modifier = Modifier.padding(start = 2.dp)){
+                Column(modifier = Modifier.padding(start = 2.dp)) {
                     Text(
                         buildAnnotatedString {
                             withStyle(style = SpanStyle(color = Color(0xFF4F46E5))) {
@@ -423,7 +423,7 @@ class ProductViwePage : ComponentActivity(), PaymentResultListener {
                     Text(
                         " ${product.brand}",
                         fontSize = 30.sp,
-                        color =  Color(0xFF4F46E5),
+                        color = Color(0xFF4F46E5),
                         fontFamily = font4,
                         fontWeight = FontWeight.ExtraBold,
                         maxLines = 1,
@@ -434,7 +434,7 @@ class ProductViwePage : ComponentActivity(), PaymentResultListener {
                     Text(
                         "Unknown",
                         fontSize = 30.sp,
-                        color =  Color(0xFF4F46E5),
+                        color = Color(0xFF4F46E5),
                         fontFamily = font4,
                         fontWeight = FontWeight.ExtraBold,
                         maxLines = 1,
@@ -473,16 +473,12 @@ class ProductViwePage : ComponentActivity(), PaymentResultListener {
             e.printStackTrace()
         }
     }
-
-
     override fun onPaymentSuccess(p0: String?) {
         Toast.makeText(this, "Payment Success ✅", Toast.LENGTH_SHORT).show()
     }
-
     override fun onPaymentError(p0: Int, p1: String?) {
         Log.d("=====", "onPaymentError: p0 :: $p0")
         Log.d("=====", "onPaymentError: p1 :: $p1")
         Toast.makeText(this, "Payment Failed ❌", Toast.LENGTH_SHORT).show()
     }
-
 }

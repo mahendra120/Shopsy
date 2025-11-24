@@ -3,7 +3,6 @@ package com.example.shopsy.SignUp_Login
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.util.Patterns
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -26,7 +25,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -45,33 +43,30 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.lifecycleScope
 import com.example.shopsy.Category
 import com.example.shopsy.R
-import com.example.shopsy.RoomDatabase.AppDatabase
 import com.example.shopsy.ui.theme.quicksand
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
+
 
 class LoginActivity : ComponentActivity() {
-    val sp by lazy {
-        getSharedPreferences("lecture", MODE_PRIVATE)
-    }
     var email by mutableStateOf("")
     var password by mutableStateOf("")
+
+    override fun onStart() {
+        super.onStart()
+        val currentUser = Firebase.auth.currentUser
+        if (currentUser != null) {
+            val intent = Intent(this@LoginActivity, Category::class.java)
+            startActivity(intent)
+            finish()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        val emailcheck = sp.getString("email", "") ?: ""
-        val passwordcheck = sp.getString("password", "") ?: ""
-
-        Log.d("90909090", "onCreate: $emailcheck $passwordcheck")
-        if (emailcheck.isNotEmpty() && passwordcheck.isNotEmpty()) {
-            val intent = Intent(this@LoginActivity, Category::class.java)
-            startActivity(intent)
-        }
         setContent {
             Box(
                 modifier = Modifier
@@ -89,9 +84,9 @@ class LoginActivity : ComponentActivity() {
         Image(
             painter = painterResource(R.drawable.purpalcolorbackgrung),
             contentDescription = null,
-            modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop
         )
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -104,7 +99,8 @@ class LoginActivity : ComponentActivity() {
                 fontSize = 48.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color(253, 253, 253),
-                fontFamily = quicksand, modifier = Modifier.padding(end = 12.dp)
+                fontFamily = quicksand,
+                modifier = Modifier.padding(end = 12.dp)
             )
             Spacer(modifier = Modifier.padding(vertical = 35.dp))
             OutlinedTextField(
@@ -118,8 +114,7 @@ class LoginActivity : ComponentActivity() {
                     Text(
                         "email", fontFamily = quicksand, color = Color(253, 253, 253)
                     )
-                }, shape = RoundedCornerShape(20.dp),
-                colors = OutlinedTextFieldDefaults.colors(
+                }, shape = RoundedCornerShape(20.dp), colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = Color(0xFF341539),
                     cursorColor = Color(253, 221, 94, 250),
                     unfocusedContainerColor = Color(0, 0, 0),
@@ -139,8 +134,7 @@ class LoginActivity : ComponentActivity() {
                     Text(
                         "password", fontFamily = quicksand, color = Color(253, 253, 253)
                     )
-                }, shape = RoundedCornerShape(20.dp),
-                colors = OutlinedTextFieldDefaults.colors(
+                }, shape = RoundedCornerShape(20.dp), colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = Color(0xFF341539),
                     cursorColor = Color(253, 221, 94, 250),
                     unfocusedContainerColor = Color(0, 0, 0),
@@ -151,49 +145,14 @@ class LoginActivity : ComponentActivity() {
             Spacer(modifier = Modifier.padding(vertical = 27.dp))
             Button(
                 onClick = {
-                    if (email.isNotEmpty() && password.isNotEmpty()) {
-                        lifecycleScope.launch(Dispatchers.IO) {
-                            val user = AppDatabase.getInstance(this@LoginActivity)
-                                .userDao()
-                                .isUserFound(email, password)
-                            sp?.edit()?.apply {
-                                putString("email", email)
-                                putString("password", password)
-                                apply()
-                            }
-                            withContext(Dispatchers.Main) {
-                                if (user != null) {
-                                    val intent = Intent(this@LoginActivity, Category::class.java)
-                                    startActivity(intent)
-                                    Toast.makeText(this@LoginActivity, "Login", Toast.LENGTH_SHORT).show()
-                                    finish()
-                                } else {
-                                    if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                                        Toast.makeText(
-                                            this@LoginActivity,
-                                            "enter valid email",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    }
-                                    Toast.makeText(
-                                        this@LoginActivity,
-                                        "User not found!!",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                }
-                            }
-                        }
-                    }
+                    Loginpage()
                 },
                 modifier = Modifier.width(220.dp),
                 border = BorderStroke(1.dp, color = Color.White),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(73, 4, 86, 255))
             ) {
                 Text(
-                    "Login",
-                    fontSize = 23.sp,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = quicksand
+                    "Login", fontSize = 23.sp, fontWeight = FontWeight.Bold, fontFamily = quicksand
                 )
             }
             Spacer(modifier = Modifier.padding(vertical = 10.dp))
@@ -205,10 +164,32 @@ class LoginActivity : ComponentActivity() {
                     buildAnnotatedString {
                         append("Haven't Acoun? ")
                         withStyle(style = SpanStyle(color = Color(253, 221, 94, 250))) {
-                            append("  Register")
+                            append("Register")
                         }
                     }, fontFamily = quicksand, color = Color.White
                 )
+            }
+        }
+    }
+
+    fun Loginpage() {
+        val auth = Firebase.auth
+        auth.signInWithEmailAndPassword(email, password).addOnCompleteListener(this) { task ->
+            if (task.isSuccessful) {
+                // Sign in success, update UI with the signed-in user's information
+                Log.d("=====", "signInWithEmail:success")
+                val user = auth.currentUser
+                val intent = Intent(this@LoginActivity, Category::class.java)
+                startActivity(intent)
+            } else {
+                // If sign in fails, display a message to the user.
+                Log.w("=====", "signInWithEmail:failure", task.exception)
+                Toast.makeText(
+                    baseContext,
+                    "Authentication failed.",
+                    Toast.LENGTH_SHORT,
+                ).show()
+
             }
         }
     }

@@ -1,8 +1,9 @@
 package com.example.shopsy.SignUp_Login
 
+
 import android.content.Intent
 import android.os.Bundle
-import android.util.Patterns
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -45,15 +46,10 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.lifecycleScope
 import com.example.shopsy.R
-import com.example.shopsy.RoomDatabase.AppDatabase
-import com.example.shopsy.RoomDatabase.User
 import com.example.shopsy.ui.theme.quicksand
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 
 class SignupActivity : ComponentActivity() {
     var name by mutableStateOf("")
@@ -68,8 +64,7 @@ class SignupActivity : ComponentActivity() {
                 modifier = Modifier
                     .fillMaxSize()
                     .padding()
-            )
-            {
+            ) {
                 SignUp()
             }
         }
@@ -81,7 +76,8 @@ class SignupActivity : ComponentActivity() {
         Image(
             painter = painterResource(R.drawable.purpalcolorbackgrung),
             contentDescription = null,
-            modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop
         )
         Column(
             modifier = Modifier
@@ -95,7 +91,8 @@ class SignupActivity : ComponentActivity() {
                 fontSize = 50.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color(253, 253, 253),
-                fontFamily = quicksand, modifier = Modifier.padding(end = 12.dp)
+                fontFamily = quicksand,
+                modifier = Modifier.padding(end = 12.dp)
             )
             Spacer(modifier = Modifier.padding(vertical = 30.dp))
             OutlinedTextField(
@@ -130,8 +127,7 @@ class SignupActivity : ComponentActivity() {
                     Text(
                         "surname", fontFamily = quicksand, color = Color(253, 253, 253)
                     )
-                }, shape = RoundedCornerShape(20.dp),
-                colors = OutlinedTextFieldDefaults.colors(
+                }, shape = RoundedCornerShape(20.dp), colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = Color(0xFF341539),
                     cursorColor = Color(253, 221, 94, 250),
                     unfocusedContainerColor = Color(0, 0, 0),
@@ -151,8 +147,7 @@ class SignupActivity : ComponentActivity() {
                     Text(
                         "email", fontFamily = quicksand, color = Color(253, 253, 253)
                     )
-                }, shape = RoundedCornerShape(20.dp),
-                colors = OutlinedTextFieldDefaults.colors(
+                }, shape = RoundedCornerShape(20.dp), colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = Color(0xFF341539),
                     cursorColor = Color(253, 221, 94, 250),
                     unfocusedContainerColor = Color(0, 0, 0),
@@ -162,22 +157,17 @@ class SignupActivity : ComponentActivity() {
             )
             Spacer(modifier = Modifier.padding(vertical = 10.dp))
             OutlinedTextField(
-                value = Password,
-                onValueChange = { Password = it },
-                leadingIcon = {
+                value = Password, onValueChange = { Password = it }, leadingIcon = {
                     Icon(
                         Icons.Default.Lock,
                         contentDescription = null,
                         tint = Color(253, 221, 94, 250),
                     )
-                },
-                placeholder = {
+                }, placeholder = {
                     Text(
                         "password", fontFamily = quicksand, color = Color(253, 253, 253)
                     )
-                },
-                shape = RoundedCornerShape(20.dp),
-                colors = OutlinedTextFieldDefaults.colors(
+                }, shape = RoundedCornerShape(20.dp), colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = Color(0xFF341539),
                     cursorColor = Color(253, 221, 94, 250),
                     unfocusedContainerColor = Color(0, 0, 0),
@@ -188,49 +178,20 @@ class SignupActivity : ComponentActivity() {
             Spacer(modifier = Modifier.padding(vertical = 25.dp))
             Button(
                 onClick = {
-                    if (name.isNotEmpty() && surname.isNotEmpty() && email.isNotEmpty() && Password.isNotEmpty()) {
-                        if (Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                            val user = User(name = name, surname = surname, email = email, password = Password)
-                            lifecycleScope.launch(Dispatchers.IO) {
-                                // Database insert background thread ma
-                                AppDatabase.getInstance(this@SignupActivity)
-                                    .userDao()
-                                    .AddUser(user)
-
-                                // UI work main thread ma
-                                withContext(Dispatchers.Main) {
-                                    val intent =
-                                        Intent(this@SignupActivity, LoginActivity::class.java)
-                                    startActivity(intent)
-                                }
-                            }
-                        } else{
-                            Toast.makeText(this@SignupActivity, "enter valid email", Toast.LENGTH_SHORT).show()
-                        }
-                    } else {
-                        Toast.makeText(
-                            this@SignupActivity,
-                            "Please fill all fields!",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
+                    SignUp1()
                 },
                 modifier = Modifier.width(220.dp),
                 border = BorderStroke(1.dp, color = Color.White),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(73, 4, 86, 255))
             ) {
                 Text(
-                    "Singup",
-                    fontSize = 23.sp,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = quicksand
+                    "Singup", fontSize = 23.sp, fontWeight = FontWeight.Bold, fontFamily = quicksand
                 )
             }
             Spacer(modifier = Modifier.padding(vertical = 8.dp))
             TextButton(
                 onClick = {
-                    val intent = Intent(this@SignupActivity, LoginActivity::class.java)
-                    startActivity(intent)
+                    finish()
                 },
                 modifier = Modifier,
             ) {
@@ -244,5 +205,27 @@ class SignupActivity : ComponentActivity() {
                 )
             }
         }
+    }
+
+    fun SignUp1() {
+        val auth = Firebase.auth
+        auth.createUserWithEmailAndPassword(email, Password)
+            .addOnCompleteListener(this) { task ->
+                if (task.isSuccessful) {
+                    // Sign in success, update UI with the signed-in user's information
+                    Log.d("======", "createUserWithEmail:success")
+                    val user = auth.currentUser
+                    val intent = Intent(this@SignupActivity, LoginActivity::class.java)
+                    startActivity(intent)
+                } else {
+                    // If sign in fails, display a message to the user.
+                    Log.w("======", "createUserWithEmail:failure", task.exception)
+                    Toast.makeText(
+                        baseContext,
+                        "Authentication failed.",
+                        Toast.LENGTH_SHORT,
+                    ).show()
+                }
+            }
     }
 }

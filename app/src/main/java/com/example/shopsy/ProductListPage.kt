@@ -3,7 +3,6 @@ package com.example.shopsy
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -33,17 +32,18 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -52,17 +52,19 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.example.shopsy.Data.Products
 import com.example.shopsy.ui.theme.ShopsyTheme
 import com.example.shopsy.ui.theme.font4
-import java.nio.file.WatchEvent
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.AdSize
+import com.google.android.gms.ads.AdView
 
 class ProductListPage : ComponentActivity() {
     var productList: ArrayList<Products> = arrayListOf()
     var name = ""
-
     @OptIn(ExperimentalMaterial3Api::class)
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -79,7 +81,7 @@ class ProductListPage : ComponentActivity() {
                     modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
                     topBar = {
                         TopAppbar(scrollBehavior)
-                    }) { innerPadding ->
+                    }, bottomBar = { BannerAdView() }) { innerPadding ->
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
@@ -91,6 +93,7 @@ class ProductListPage : ComponentActivity() {
             }
         }
     }
+
     @OptIn(ExperimentalGlideComposeApi::class)
     @Composable
     fun ProductListUI() {
@@ -111,7 +114,7 @@ class ProductListPage : ComponentActivity() {
                         .clip(shape = RoundedCornerShape(12.dp))
                         .border(
                             1.dp,
-                            color =  Color(0xFF2479B2),
+                            color = Color(0xFF4F46E5),
                             shape = RoundedCornerShape(12.dp)
                         ),
                     colors = CardDefaults.cardColors(containerColor = Color.Transparent)
@@ -190,11 +193,33 @@ class ProductListPage : ComponentActivity() {
             }
         }
     }
+
+    @Composable
+    fun BannerAdView(modifier: Modifier = Modifier) {
+        val context = LocalContext.current
+        val adView = remember {
+            AdView(context).apply {
+                adUnitId = "ca-app-pub-3940256099942544/9214589741" // test banner
+                setAdSize(AdSize.BANNER) // or adaptive size if needed
+            }
+        }
+
+        LaunchedEffect(Unit) {
+            val adRequest = AdRequest.Builder().build()
+            adView.loadAd(adRequest)
+        }
+
+        AndroidView(
+            modifier = modifier.fillMaxWidth(),
+            factory = { adView }
+        )
+    }
+
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun TopAppbar(scrollBehavior: TopAppBarScrollBehavior) {
         TopAppBar(
-            title ={
+            title = {
                 Image(painter = painterResource(R.drawable.shopsy), contentDescription = null)
             },
             navigationIcon = {

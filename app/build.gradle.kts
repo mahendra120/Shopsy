@@ -3,6 +3,8 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     id("com.google.devtools.ksp")
+    id("com.google.gms.google-services")
+
 }
 
 android {
@@ -61,7 +63,7 @@ dependencies {
     val room_version = "2.7.2"
     implementation("androidx.room:room-runtime:$room_version")
     ksp("androidx.room:room-compiler:$room_version")
-    // If this project only                    uses Java source, use the Java annotationProcessor
+    // If this project only uses Java source, use the Java annotationProcessor
     // No additional plugins are necessary
     annotationProcessor("androidx.room:room-compiler:$room_version")
     implementation("com.android.volley:volley:1.2.1")
@@ -77,17 +79,21 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.4.0")
     implementation("androidx.compose.material:material-icons-extended:<version>")
     implementation("com.razorpay:checkout:1.6.40")
-    // retrofit
 
-    implementation("com.squareup.retrofit2:retrofit:2.11.0")
-    // gson converter
-    implementation("com.squareup.retrofit2:converter-gson:2.11.0")
-
-    implementation ("com.google.accompanist:accompanist-pager:0.30.1")
-    implementation ("com.google.accompanist:accompanist-pager-indicators:0.30.1")
-
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
+        // retrofit
+        implementation("com.squareup.retrofit2:retrofit:2.11.0")
+        // gson converter
+        implementation("com.squareup.retrofit2:converter-gson:2.11.0")
+        implementation("com.google.accompanist:accompanist-pager:0.30.1")
+        implementation("com.google.accompanist:accompanist-pager-indicators:0.30.1")
+        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
 
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.9.2")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.9.2")
+
+    implementation(platform("com.google.firebase:firebase-bom:34.2.0"))
+    implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-auth")
+
+    implementation("com.google.android.gms:play-services-ads:24.5.0")
 }
